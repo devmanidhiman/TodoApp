@@ -1,0 +1,11 @@
+D:\CSharp\Projects\To-do List\TodoApp.Core\bin\Debug\net9.0\TodoApp.Core.deps.json
+D:\CSharp\Projects\To-do List\TodoApp.Core\bin\Debug\net9.0\TodoApp.Core.dll
+D:\CSharp\Projects\To-do List\TodoApp.Core\bin\Debug\net9.0\TodoApp.Core.pdb
+D:\CSharp\Projects\To-do List\TodoApp.Core\obj\Debug\net9.0\TodoApp.Core.GeneratedMSBuildEditorConfig.editorconfig
+D:\CSharp\Projects\To-do List\TodoApp.Core\obj\Debug\net9.0\TodoApp.Core.AssemblyInfoInputs.cache
+D:\CSharp\Projects\To-do List\TodoApp.Core\obj\Debug\net9.0\TodoApp.Core.AssemblyInfo.cs
+D:\CSharp\Projects\To-do List\TodoApp.Core\obj\Debug\net9.0\TodoApp.Core.csproj.CoreCompileInputs.cache
+D:\CSharp\Projects\To-do List\TodoApp.Core\obj\Debug\net9.0\TodoApp.Core.dll
+D:\CSharp\Projects\To-do List\TodoApp.Core\obj\Debug\net9.0\refint\TodoApp.Core.dll
+D:\CSharp\Projects\To-do List\TodoApp.Core\obj\Debug\net9.0\TodoApp.Core.pdb
+D:\CSharp\Projects\To-do List\TodoApp.Core\obj\Debug\net9.0\ref\TodoApp.Core.dll

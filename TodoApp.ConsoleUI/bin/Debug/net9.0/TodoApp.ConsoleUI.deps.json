@@ -1,0 +1,56 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v9.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v9.0": {
+      "TodoApp.ConsoleUI/1.0.0": {
+        "dependencies": {
+          "TodoApp.Core": "1.0.0",
+          "TodoApp.Infrastructure": "1.0.0"
+        },
+        "runtime": {
+          "TodoApp.ConsoleUI.dll": {}
+        }
+      },
+      "TodoApp.Core/1.0.0": {
+        "runtime": {
+          "TodoApp.Core.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "TodoApp.Infrastructure/1.0.0": {
+        "dependencies": {
+          "TodoApp.Core": "1.0.0"
+        },
+        "runtime": {
+          "TodoApp.Infrastructure.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "TodoApp.ConsoleUI/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "TodoApp.Core/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "TodoApp.Infrastructure/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
