@@ -1,22 +1,18 @@
+using Microsoft.Extensions.Logging;
 using TodoApp.Core.Interfaces;
 using TodoApp.Core.Entities;
 using System.Text.Json;
 
 namespace TodoApp.Infrastructure.Repositories;
-public class FileTodoRepository //: ITodoRepository
+public class FileTodoRepository : ITodoRepository
 {
     private readonly string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "todoitems.json"); // You can make this configurable
-
+    private readonly ILogger<FileTodoRepository> _logger;
     private List<TodoItem> todos = new();
 
-    public FileTodoRepository()
+    public FileTodoRepository(ILogger<FileTodoRepository> logger)
     {
-        Console.WriteLine("FileTodoRepository constructor called");
-
-        Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
-        Console.WriteLine($"Using file path: {filePath}");
-
-        //LoadFromFile();
+        _logger = logger;
     }
 
     public void Add(TodoItem todo)
@@ -65,8 +61,9 @@ public class FileTodoRepository //: ITodoRepository
     {
         if (File.Exists(filePath))
         {
+            _logger.LogInformation("Clearing all todo items: file exists at {filepath}");
             File.WriteAllText(filePath, "[]");
-            Console.WriteLine("All todo items cleared.");
+            _logger.LogInformation("Todo file successfully cleared.");
         }
 
     }
