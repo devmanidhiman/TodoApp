@@ -61,9 +61,37 @@ public class FileTodoRepository //: ITodoRepository
         Console.WriteLine($"Deleted Todo: [{todoToDelete.Id}] {todoToDelete.Title}");
         return true;
     }
-    // public void ClearAll() { items.Clear(); SaveToFile(); }
-    // public bool Exists(int id) => items.Any(i => i.Id == id);
+    public void ClearAll()
+    {
+        if (File.Exists(filePath))
+        {
+            File.WriteAllText(filePath, "[]");
+            Console.WriteLine("All todo items cleared.");
+        }
+
+    }
+    public bool Exists(int id)
+    {
+        var items = LoadFromFile();
+        return items.Any(item => item.Id == id);
+    }
     public IEnumerable<TodoItem> GetAll() => LoadFromFile();
+    public List<TodoItem> GetTodoItems()
+    {
+        if (!File.Exists(filePath))
+        {
+            Console.WriteLine("Todo items file does not exist. Returning empty list.");
+            return new List<TodoItem>();
+        }
+        var json = File.ReadAllText(filePath);
+        if (string.IsNullOrEmpty(json))
+        {
+            Console.WriteLine("Todo items file is empty. Returning empty list.");
+            return new List<TodoItem>();
+        }
+        return JsonSerializer.Deserialize<List<TodoItem>>(json) ?? new List<TodoItem>();
+    }
+
     public TodoItem? GetTodoById(int id)
     {
         var todos = LoadFromFile();
@@ -78,7 +106,11 @@ public class FileTodoRepository //: ITodoRepository
         }
         return todo;
     }
-    // public IEnumerable<TodoItem> GetCompletedItems() => items.Where(i => i.IsCompleted);
+    public IEnumerable<TodoItem> GetCompletedItems()
+    {
+        var allItems = LoadFromFile();
+        return [.. allItems.Where(item => item.IsCompleted)];
+    }
 
     private void SaveToFile(List<TodoItem> todos)
     {
