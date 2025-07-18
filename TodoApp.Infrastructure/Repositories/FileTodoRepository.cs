@@ -61,10 +61,15 @@ public class FileTodoRepository : ITodoRepository
     {
         if (File.Exists(filePath))
         {
-            _logger.LogInformation("Clearing all todo items: file exists at {filepath}");
+            _logger.LogInformation("ClearAll(): File found at path {Path}. Starting deletion of all todo items.", filePath);
             File.WriteAllText(filePath, "[]");
-            _logger.LogInformation("Todo file successfully cleared.");
+            _logger.LogInformation("ClearAll(): Todo file successfully cleared.");
         }
+        else
+        {
+            _logger.LogWarning("ClearAll(): Todo file not found at path {Path}. Nothing to clear.", filePath);
+        }
+
 
     }
     public bool Exists(int id)
