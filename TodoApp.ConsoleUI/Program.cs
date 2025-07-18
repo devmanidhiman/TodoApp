@@ -3,13 +3,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using TodoApp.Core.Interfaces;
+using TodoApp.Core.Entities;
 
 class Program
 {
     static void Main(string[] args)
     {
         // Create a HostBuilder to set up dependency injection and logging
-        var host = Host.CreateDefaultBuilder()
+        var host = Host.CreateDefaultBuilder(args)
         .ConfigureServices((context, services) =>
         { services.AddSingleton<ITodoRepository, FileTodoRepository>(); })
         .ConfigureLogging(logging =>
@@ -20,6 +21,10 @@ class Program
         }).Build();
         // Resolve the ITodoRepository from the service provider
         var repo = host.Services.GetRequiredService<ITodoRepository>();
-        //Console.WriteLine("Welcome to the Todo App!");
+        Console.WriteLine($"Resolved repo type: {repo.GetType().Name}");
+        repo.Add(new TodoItem { Id = 1, Title = "Test Add", IsCompleted = false });
+
+        //repo.ClearAll();
+
     }
 }

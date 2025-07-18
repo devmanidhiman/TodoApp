@@ -3,7 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\TodoApp.Core\TodoApp.Core.csproj" />
     <ProjectReference Include="..\TodoApp.Infrastructure\TodoApp.Infrastructure.csproj" />
-    <ProjectReference Include="..\Todo.Application\Todo.Application.csproj" />
+    <ProjectReference Include="..\TodoApp.Application\TodoApp.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>

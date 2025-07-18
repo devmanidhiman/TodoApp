@@ -60,5 +60,15 @@ namespace TodoApp.Core.Interfaces
         /// </summary>
         /// <returns>A list of completed todo items.</returns>
         IEnumerable<TodoItem> GetCompletedItems();
+
+        /// <summary>
+        /// Marks all incomplete todo items as completed and saves the updated list to persistent storage.
+        /// </summary>
+        /// <remarks>
+        /// This method iterates through all todo items and sets <c>IsCompleted</c> to <c>true</c>
+        /// for items that are not yet completed. It then persists the changes using <see cref="Save"/>.
+        /// Structured logging is used to record each updated item and a summary of the operation.
+        /// </remarks>
+        void CheckAll();
     }
 }

@@ -13,21 +13,44 @@ public class FileTodoRepository : ITodoRepository
     public FileTodoRepository(ILogger<FileTodoRepository> logger)
     {
         _logger = logger;
+        Console.WriteLine("Logger injected successfully."); // Add this temporarily
     }
+
+    /// <summary>
+    /// Saves the current list of todo items to the persistent storage file.
+    /// </summary>
+    /// <remarks>
+    /// This method serializes the in-memory <c>todos</c> list to JSON and writes it to the file
+    /// specified by <c>filePath</c>. It logs the result of the operation.
+    /// </remarks>
+    private void Save()
+    {
+        try
+        {
+            string json = JsonSerializer.Serialize(todos, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(filePath, json);
+            _logger.LogInformation("Save(): Todo items successfully saved to file.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Save(): Failed to save todo items to file.");
+        }
+    }
+
 
     public void Add(TodoItem todo)
     {
         var todos = LoadFromFile();
         if (todos.Any(t => t.Id == todo.Id))
         {
-            Console.WriteLine($"Todo item with ID {todo.Id} already exists. Skipping add.");
+            _logger.LogWarning("Add(): Todo item with ID {Id} already exists. Skipping add.", todo.Id);
             return;
         }
         todos.Add(todo);
-        Console.WriteLine($"Adding todo item: {todo}");
-        SaveToFile(todos);
-        Console.WriteLine($"Added Todo: [{todo.Id}] {todo.Title}");
-
+        _logger.LogInformation("Add(): Adding todo item — ID: {Id}, Title: '{Title}'", todo.Id, todo.Title);
+        this.todos = todos;
+        Save();
+        _logger.LogInformation("Add(): Successfully added todo item - ID: {id}, Title: '{title}'", todo.Id, todo.Title);
     }
     public bool Update(TodoItem item)
     {
@@ -39,7 +62,7 @@ public class FileTodoRepository : ITodoRepository
             return false;
         }
         todos[index] = item;
-        SaveToFile(todos);
+        Save();
         Console.WriteLine($"Updated Todo: [{item.Id}] {item.Title}");
         return true;
     }
@@ -53,12 +76,13 @@ public class FileTodoRepository : ITodoRepository
             return false;
         }
         todos.Remove(todoToDelete);
-        SaveToFile(todos);
+        Save();
         Console.WriteLine($"Deleted Todo: [{todoToDelete.Id}] {todoToDelete.Title}");
         return true;
     }
     public void ClearAll()
     {
+        Console.WriteLine("ClearAll() was called.");
         if (File.Exists(filePath))
         {
             _logger.LogInformation("ClearAll(): File found at path {Path}. Starting deletion of all todo items.", filePath);
@@ -114,11 +138,35 @@ public class FileTodoRepository : ITodoRepository
         return [.. allItems.Where(item => item.IsCompleted)];
     }
 
-    private void SaveToFile(List<TodoItem> todos)
+    public void CheckAll()
     {
-        string json = JsonSerializer.Serialize(todos, new JsonSerializerOptions { WriteIndented = true });
-        File.WriteAllText(filePath, json);
+        Console.WriteLine("CheckAll() was called.");
+        _logger.LogInformation("CheckAll(); Starting to mark all incomplete Todo items as complete.");
+
+        int updatedCount = 0;
+        foreach (var item in todos)
+        {
+            if (!item.IsCompleted)
+            {
+                item.IsCompleted = true;
+                updatedCount++;
+                _logger.LogInformation("CheckAll(): Marked item as completed ID: {Id}, Title: '{Title}'", item.Id, item.Title);
+            }
+
+        }
+
+        Save();
+        if (updatedCount > 0)
+        {
+            _logger.LogInformation("CheckAll(): Completed {Count} items.", updatedCount);
+        }
+        else
+        {
+            _logger.LogInformation("CheckAll(): No incomplete items found.");
+        }
+
     }
+
     private List<TodoItem> LoadFromFile()
     {
         if (!File.Exists(filePath))
