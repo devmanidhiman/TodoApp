@@ -4,6 +4,7 @@ using TodoApp.Core.Entities;
 using System.Text.Json;
 
 namespace TodoApp.Infrastructure.Repositories;
+
 public class FileTodoRepository : ITodoRepository
 {
     private readonly string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "todoitems.json"); // You can make this configurable
@@ -37,6 +38,28 @@ public class FileTodoRepository : ITodoRepository
         }
     }
 
+    private List<TodoItem> LoadFromFile()
+    {
+        if (!File.Exists(filePath))
+        {
+            Console.WriteLine("JSON file not found. Returning empty list.");
+            return new List<TodoItem>();
+        }
+
+        string json = File.ReadAllText(filePath); ;
+        try
+        {
+            todos = JsonSerializer.Deserialize<List<TodoItem>>(json) ?? new List<TodoItem>();
+            Console.WriteLine($"Loaded {todos.Count} todo items from file.");
+        }
+        catch (JsonException ex)
+        {
+            Console.WriteLine($"Error deserializing JSON: {ex.Message}");
+            todos = new List<TodoItem>();
+        }
+        return todos;
+    }
+
 
     public void Add(TodoItem todo)
     {
@@ -52,33 +75,51 @@ public class FileTodoRepository : ITodoRepository
         Save();
         _logger.LogInformation("Add(): Successfully added todo item - ID: {id}, Title: '{title}'", todo.Id, todo.Title);
     }
-    public bool Update(TodoItem item)
+    public bool Update(int id, string newTitle, bool isCompleted, DateTime dueDate)
     {
         var todos = LoadFromFile();
-        var index = todos.FindIndex(t => t.Id == item.Id);
-        if (index == -1)
+        var item = todos.FirstOrDefault(i => i.Id == id);
+        if (item == null)
         {
-            Console.WriteLine($"Todo item with ID {item.Id} not found. Update failed.");
+            _logger.LogWarning("Update(): No todo item found with ID {Id}. Update skipped.", id);
             return false;
         }
-        todos[index] = item;
+        string oldTitle = item.Title;
+        DateTime? oldDueDate = item.DueDate;
+        bool oldStatus = item.IsCompleted; 
+        item.Title = newTitle;
+        item.IsCompleted = isCompleted;
+        item.DueDate = dueDate;
+        _logger.LogInformation(
+            "Update(): Todo item ID {Id} updated — Title: '{OldTitle}' → '{NewTitle}', Due: {OldDueDate} → {NewDueDate}, Completed: {OldStatus} → {NewStatus}",
+            id,
+            oldTitle,
+            newTitle,
+            oldDueDate?.ToString("yyyy-MM-dd"),
+            dueDate.ToString("yyyy-MM-dd"),
+            oldStatus,
+            isCompleted);
         Save();
-        Console.WriteLine($"Updated Todo: [{item.Id}] {item.Title}");
         return true;
     }
+
+    /// <summary>
+    /// Deletes a todo item by ID. Returns true if the item was found and deleted; false otherwise.
+    /// </summary>
     public bool Delete(int id)
     {
         var todos = LoadFromFile();
-        var todoToDelete = todos.FirstOrDefault(t => t.Id == id);
-        if (todoToDelete == null)
+        var item = todos.FirstOrDefault(t => t.Id == id);
+        if (item == null)
         {
-            Console.WriteLine($"Todo item with ID {id} not found. Deletion failed.");
+            _logger.LogWarning("Delete(): No todo item found with ID {Id}. Deletion skipped.", id);
             return false;
         }
-        todos.Remove(todoToDelete);
+        todos.Remove(item);
+        _logger.LogInformation("Delete(): Successfully deleted todo item — ID: {Id}, Title: '{Title}'", item.Id, item.Title);
         Save();
-        Console.WriteLine($"Deleted Todo: [{todoToDelete.Id}] {todoToDelete.Title}");
         return true;
+
     }
     public void ClearAll()
     {
@@ -101,7 +142,15 @@ public class FileTodoRepository : ITodoRepository
         var items = LoadFromFile();
         return items.Any(item => item.Id == id);
     }
-    public IEnumerable<TodoItem> GetAll() => LoadFromFile();
+    public IEnumerable<TodoItem> GetAll()
+    {
+        var todos = LoadFromFile();
+        var total = todos.Count();
+        var completed = todos.Count(t => t.IsCompleted);
+        var pending = todos.Count(t => !t.IsCompleted);
+        _logger.LogInformation("GetAll(): Retrieved {Total} items — {Completed} completed, {Pending} pending.", total, completed, pending);
+        return todos;
+    }
     public List<TodoItem> GetTodoItems()
     {
         if (!File.Exists(filePath))
@@ -140,18 +189,17 @@ public class FileTodoRepository : ITodoRepository
 
     public void CheckAll()
     {
-        Console.WriteLine("CheckAll() was called.");
-        _logger.LogInformation("CheckAll(); Starting to mark all incomplete Todo items as complete.");
+        Console.WriteLine("Marking all incomplete items as completed...");
+        _logger.LogInformation("CheckAll(): Starting to mark all incomplete Todo items as complete.");
 
         int updatedCount = 0;
-        foreach (var item in todos)
+        var incomplete = todos.Where(t => !t.IsCompleted).ToList();
+        _logger.LogInformation("CheckAll(): Found {Count} incomplete items to update.", incomplete.Count);
+        foreach (var item in incomplete)
         {
-            if (!item.IsCompleted)
-            {
-                item.IsCompleted = true;
-                updatedCount++;
-                _logger.LogInformation("CheckAll(): Marked item as completed ID: {Id}, Title: '{Title}'", item.Id, item.Title);
-            }
+            item.IsCompleted = true;
+            updatedCount++;
+            _logger.LogInformation("CheckAll(): Marked item as completed ID: {Id}, Title: '{Title}'", item.Id, item.Title);
 
         }
 
@@ -166,27 +214,7 @@ public class FileTodoRepository : ITodoRepository
         }
 
     }
-
-    private List<TodoItem> LoadFromFile()
-    {
-        if (!File.Exists(filePath))
-        {
-            Console.WriteLine("JSON file not found. Returning empty list.");
-            return new List<TodoItem>();
-        }
-
-        string json = File.ReadAllText(filePath); ;
-        try
-        {
-            todos = JsonSerializer.Deserialize<List<TodoItem>>(json) ?? new List<TodoItem>();
-            Console.WriteLine($"Loaded {todos.Count} todo items from file.");
-        }
-        catch (JsonException ex)
-        {
-            Console.WriteLine($"Error deserializing JSON: {ex.Message}");
-            todos = new List<TodoItem>();
-        }
-        return todos;
-    }
+    
+    
 }
 
