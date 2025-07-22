@@ -84,17 +84,30 @@ public class FileTodoRepository : ITodoRepository
             _logger.LogWarning("Update(): No todo item found with ID {Id}. Update skipped.", id);
             return false;
         }
+
         string oldTitle = item.Title;
         DateTime? oldDueDate = item.DueDate;
-        bool oldStatus = item.IsCompleted; 
-        item.Title = newTitle;
-        item.IsCompleted = isCompleted;
-        item.DueDate = dueDate;
+        bool oldStatus = item.IsCompleted;
 
         var updatedFields = new List<string>();
-        if (newTitle != null) updatedFields.Add("Title");
-        if (isCompleted.HasValue) updatedFields.Add("IsCompleted");
-        if (dueDate.HasValue) updatedFields.Add("DueDate");
+
+        if (newTitle != null)
+        {
+            item.Title = newTitle;
+            updatedFields.Add("Title");
+        }
+
+        if (isCompleted.HasValue)
+        {
+            item.IsCompleted = isCompleted.Value;
+            updatedFields.Add("IsCompleted");
+        }
+
+        if (dueDate.HasValue)
+        {
+            item.DueDate = dueDate.Value;
+            updatedFields.Add("DueDate");
+        }
 
         _logger.LogInformation("Update(): Fields updated for ID {Id}: {Fields}", id, string.Join(", ", updatedFields));
         Save();
