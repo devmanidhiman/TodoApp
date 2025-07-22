@@ -60,10 +60,21 @@ public class FileTodoRepository : ITodoRepository
         return todos;
     }
 
+    private static int GenerateNewId(List<TodoItem> todos)
+    {
+        return todos.Select(t => t.Id).DefaultIfEmpty(0).Max() + 1;
+    }
+
 
     public void Add(TodoItem todo)
     {
+        if (!TodoValidator.IsValid(todo.Title, todo.DueDate, out string errorMessage))
+        {
+            _logger.LogWarning("Add(): Validation failed — {Error}", errorMessage);
+            return;
+        }
         var todos = LoadFromFile();
+        todo.Id = GenerateNewId(todos);
         if (todos.Any(t => t.Id == todo.Id))
         {
             _logger.LogWarning("Add(): Todo item with ID {Id} already exists. Skipping add.", todo.Id);
@@ -73,7 +84,7 @@ public class FileTodoRepository : ITodoRepository
         _logger.LogInformation("Add(): Adding todo item — ID: {Id}, Title: '{Title}'", todo.Id, todo.Title);
         this.todos = todos;
         Save();
-        _logger.LogInformation("Add(): Successfully added todo item - ID: {id}, Title: '{title}'", todo.Id, todo.Title);
+        _logger.LogInformation("Add(): Successfully added todo item - ID: {Id}, Title: '{Title}'", todo.Id, todo.Title);
     }
     public bool Update(int id, string? newTitle, bool? isCompleted, DateTime? dueDate)
     {
@@ -82,6 +93,15 @@ public class FileTodoRepository : ITodoRepository
         if (item == null)
         {
             _logger.LogWarning("Update(): No todo item found with ID {Id}. Update skipped.", id);
+            return false;
+        }
+
+        string effectiveTitle = newTitle ?? item.Title;
+        DateTime? effectiveDueDate = dueDate ?? item.DueDate;
+
+        if (!TodoValidator.IsValid(effectiveTitle, effectiveDueDate, out var error))
+        {
+            _logger.LogWarning("Update(): Validation failed for ID {Id} — {Error}", id, error);
             return false;
         }
 
