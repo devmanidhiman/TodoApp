@@ -75,7 +75,7 @@ public class FileTodoRepository : ITodoRepository
         Save();
         _logger.LogInformation("Add(): Successfully added todo item - ID: {id}, Title: '{title}'", todo.Id, todo.Title);
     }
-    public bool Update(int id, string newTitle, bool isCompleted, DateTime dueDate)
+    public bool Update(int id, string? newTitle, bool? isCompleted, DateTime? dueDate)
     {
         var todos = LoadFromFile();
         var item = todos.FirstOrDefault(i => i.Id == id);
@@ -90,15 +90,13 @@ public class FileTodoRepository : ITodoRepository
         item.Title = newTitle;
         item.IsCompleted = isCompleted;
         item.DueDate = dueDate;
-        _logger.LogInformation(
-            "Update(): Todo item ID {Id} updated — Title: '{OldTitle}' → '{NewTitle}', Due: {OldDueDate} → {NewDueDate}, Completed: {OldStatus} → {NewStatus}",
-            id,
-            oldTitle,
-            newTitle,
-            oldDueDate?.ToString("yyyy-MM-dd"),
-            dueDate.ToString("yyyy-MM-dd"),
-            oldStatus,
-            isCompleted);
+
+        var updatedFields = new List<string>();
+        if (newTitle != null) updatedFields.Add("Title");
+        if (isCompleted.HasValue) updatedFields.Add("IsCompleted");
+        if (dueDate.HasValue) updatedFields.Add("DueDate");
+
+        _logger.LogInformation("Update(): Fields updated for ID {Id}: {Fields}", id, string.Join(", ", updatedFields));
         Save();
         return true;
     }

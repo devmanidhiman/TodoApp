@@ -32,7 +32,7 @@ namespace TodoApp.Core.Interfaces
         /// </summary>
         /// <param name="item">The todo item to update.</param>
         /// <returns>True if the update was successful; otherwise, false.</returns>
-        bool Update(TodoItem item);
+        bool Update(int id, string newTitle, bool isCompleted, DateTime dueDate);
 
         /// <summary>
         /// Deletes a todo item by its ID.
