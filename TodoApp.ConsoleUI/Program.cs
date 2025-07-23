@@ -4,6 +4,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using TodoApp.Core.Interfaces;
 using TodoApp.Core.Entities;
+using System.ComponentModel.Design;
+using System.Buffers;
+using TodoApp.Core.Services;
 
 class Program
 {
@@ -21,35 +24,110 @@ class Program
         }).Build();
         // Resolve the ITodoRepository from the service provider
         var repo = host.Services.GetRequiredService<ITodoRepository>();
-        Console.WriteLine($"Resolved repo type: {repo.GetType().Name}");
+        var logger = host.Services.GetRequiredService<ILogger<TodoService>>();
 
-        var validTodo = new TodoItem
+        var todoService = new TodoService(repo, logger);
+
+
+        void ShowHelp()
         {
-            Title = "Finish logging refactor",
-            DueDate = DateTime.Today.AddDays(2),
-            IsCompleted = false
-        };
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("To-Do App - Command Line Interface\n");
+            Console.ResetColor();
 
-        Console.WriteLine($"Assigned ID: {validTodo.Id}");
+            Console.WriteLine("Usage:");
+            Console.WriteLine("  add <title>               Add a new to-do item");
+            Console.WriteLine("  update <id> <title>       Update an existing item");
+            Console.WriteLine("  delete <id>               Delete an item by ID");
+            Console.WriteLine("  list                      List all to-do items");
+            Console.WriteLine("  filter <status>           Filter items by status (completed/pending)");
+            Console.WriteLine("  help                      Show this help menu\n");
 
-        var invalidTitleTodo = new TodoItem
+            Console.WriteLine("Examples:");
+            Console.WriteLine("  dotnet run add \"Buy groceries\"");
+            Console.WriteLine("  dotnet run update 3 \"Buy milk instead\"");
+            Console.WriteLine("  dotnet run delete 2");
+
+        }
+
+        if (args.Length == 0)
         {
-            Title = "   ", // Invalid title
-            DueDate = DateTime.Today.AddDays(2),
-            IsCompleted = false
-        };
+            ShowHelp();
+            return;
+        }
 
-        var pastDueTodo = new TodoItem
+        string command = args[0].ToLower();
+
+        switch (command)
         {
-            Title = "Submit PR",
-            DueDate = DateTime.Today.AddDays(-1), // Invalid due date
-            IsCompleted = false
-        };
+            case "add":
+                if (args.Length < 2)
+                {
+                    Console.WriteLine("Error: Title is required for 'add' command.");
+                    return;
+                }
+                todoService.Add(args[1]);
+                break;
+
+            case "update":
+                if (args.Length < 3 || !int.TryParse(args[1], out int updateId))
+                {
+                    Console.WriteLine("Error: Valid ID and title are required for 'update'.");
+                    return;
+                }
+                todoService.Update(updateId, args[2]);
+                break;
+
+            case "delete":
+                if (args.Length < 2 || !int.TryParse(args[1], out int deleteId))
+                {
+                    Console.WriteLine("Error: Valid ID is required for 'delete'.");
+                    return;
+                }
+                todoService.Delete(deleteId);
+                break;
+
+            case "list":
+                var items = todoService.GetAll();
+                foreach (var item in items)
+                {
+                    Console.WriteLine($"{item.Id}: {item.Title} [{(item.IsCompleted ? "✓" : " ")}]");
+                }
+                break;
+
+            default:
+                Console.WriteLine($"Unknown command: {command}");
+                ShowHelp();
+                break;
+        }
+
+        // var validTodo = new TodoItem
+        // {
+        //     Title = "Finish logging refactor",
+        //     DueDate = DateTime.Today.AddDays(2),
+        //     IsCompleted = false
+        // };
+
+        // Console.WriteLine($"Assigned ID: {validTodo.Id}");
+
+        // var invalidTitleTodo = new TodoItem
+        // {
+        //     Title = "   ", // Invalid title
+        //     DueDate = DateTime.Today.AddDays(2),
+        //     IsCompleted = false
+        // };
+
+        // var pastDueTodo = new TodoItem
+        // {
+        //     Title = "Submit PR",
+        //     DueDate = DateTime.Today.AddDays(-1), // Invalid due date
+        //     IsCompleted = false
+        // };
 
 
-        repo.Add(validTodo);         // Should succeed and assign ID
-        repo.Add(invalidTitleTodo); // Should fail validation
-        repo.Add(pastDueTodo);      // Should fail validation
+        // repo.Add(validTodo);         // Should succeed and assign ID
+        // repo.Add(invalidTitleTodo); // Should fail validation
+        // repo.Add(pastDueTodo);      // Should fail validation
 
     }
 }

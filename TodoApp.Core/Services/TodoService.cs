@@ -1,0 +1,57 @@
+using TodoApp.Core.Entities;
+using TodoApp.Core.Interfaces;
+using Microsoft.Extensions.Logging;
+
+namespace TodoApp.Core.Services;
+
+public class TodoService
+{
+    private readonly ITodoRepository _repo;
+    private readonly ILogger<TodoService> _logger;
+
+    public TodoService(ITodoRepository repo, ILogger<TodoService> logger)
+    {
+        _repo = repo;
+        _logger = logger;
+    }
+
+    public void Add(string title)
+    {
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            _logger.LogWarning("Attempted to add empty title.");
+            Console.WriteLine("Error: Title cannot be empty.");
+            return;
+        }
+
+        var item = new TodoItem { Title = title };
+        _repo.Add(item);
+        _logger.LogInformation("Added item: {Title}", title);
+    }
+
+    public void Update(int id, string title)
+    {
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            _logger.LogWarning("Attempted to Update with empty title.");
+            Console.WriteLine("Error: Title cannot be empty.");
+            return;
+        }
+
+        _repo.Update(id, title, null, null);
+        _logger.LogInformation("Updated item {Id} with new title: {Title}", id, title);
+
+    }
+
+    public void Delete(int id)
+    {
+        _repo.Delete(id);
+        _logger.LogInformation("Deleted item with ID: {Id}", id);
+    }
+
+    public IEnumerable<TodoItem> GetAll()
+    {
+        return _repo.GetAll();
+    }
+
+}

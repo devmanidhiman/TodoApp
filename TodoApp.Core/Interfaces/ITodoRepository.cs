@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using TodoApp.Core.Entities;
 
 namespace TodoApp.Core.Interfaces
