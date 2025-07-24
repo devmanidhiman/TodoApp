@@ -29,24 +29,31 @@ public class TodoService
         _logger.LogInformation("Added item: {Title}", title);
     }
 
-    public void Update(int id, string title)
+    public void Update(int id, string? title, bool? isCompleted, DateTime? dueDate)
     {
-        if (string.IsNullOrWhiteSpace(title))
+        if (title is not null && string.IsNullOrWhiteSpace(title))
         {
             _logger.LogWarning("Attempted to Update with empty title.");
             Console.WriteLine("Error: Title cannot be empty.");
             return;
         }
 
-        _repo.Update(id, title, null, null);
-        _logger.LogInformation("Updated item {Id} with new title: {Title}", id, title);
+        _repo.Update(id, title, isCompleted, dueDate);
+        _logger.LogInformation("Updated item {Id} with values: Title='{Title}', Completed={Completed}, DueDate={DueDate}",
+            id, title, isCompleted, dueDate);
 
     }
 
-    public void Delete(int id)
+    public bool Delete(int id)
     {
-        _repo.Delete(id);
+        var success = _repo.Delete(id);
+        if (!success)
+        {
+            _logger.LogWarning("TodoService: Delete failed for ID {Id}", id);
+            return false;
+        }
         _logger.LogInformation("Deleted item with ID: {Id}", id);
+        return true;
     }
 
     public IEnumerable<TodoItem> GetAll()

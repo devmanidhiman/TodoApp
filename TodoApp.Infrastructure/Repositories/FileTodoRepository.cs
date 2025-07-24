@@ -14,7 +14,6 @@ public class FileTodoRepository : ITodoRepository
     public FileTodoRepository(ILogger<FileTodoRepository> logger)
     {
         _logger = logger;
-        Console.WriteLine("Logger injected successfully."); // Add this temporarily
     }
 
     /// <summary>
@@ -50,7 +49,6 @@ public class FileTodoRepository : ITodoRepository
         try
         {
             todos = JsonSerializer.Deserialize<List<TodoItem>>(json) ?? new List<TodoItem>();
-            Console.WriteLine($"Loaded {todos.Count} todo items from file.");
         }
         catch (JsonException ex)
         {
@@ -144,11 +142,21 @@ public class FileTodoRepository : ITodoRepository
         if (item == null)
         {
             _logger.LogWarning("Delete(): No todo item found with ID {Id}. Deletion skipped.", id);
+            Console.WriteLine($"Error: No item found with ID {id}.");
             return false;
         }
-        todos.Remove(item);
-        _logger.LogInformation("Delete(): Successfully deleted todo item — ID: {Id}, Title: '{Title}'", item.Id, item.Title);
-        Save();
+        try
+        {
+            todos.Remove(item);
+            Save();
+            _logger.LogInformation("Delete(): Item with ID {Id} deleted.", id);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Delete(): Failed to delete item {Id}", id);
+            Console.WriteLine("Error: Failed to delete item.");
+        }
+
         return true;
 
     }

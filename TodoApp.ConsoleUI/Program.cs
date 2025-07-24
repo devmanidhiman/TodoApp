@@ -6,6 +6,7 @@ using TodoApp.Core.Interfaces;
 using TodoApp.Core.Entities;
 using System.ComponentModel.Design;
 using System.Buffers;
+using System.Linq;
 using TodoApp.Core.Services;
 
 class Program
@@ -27,6 +28,7 @@ class Program
         var logger = host.Services.GetRequiredService<ILogger<TodoService>>();
 
         var todoService = new TodoService(repo, logger);
+        Console.WriteLine("Args: " + string.Join(" | ", args));
 
 
         void ShowHelp()
@@ -70,12 +72,45 @@ class Program
                 break;
 
             case "update":
-                if (args.Length < 3 || !int.TryParse(args[1], out int updateId))
+                if (args.Length < 2 || !int.TryParse(args[1], out int updateId))
                 {
-                    Console.WriteLine("Error: Valid ID and title are required for 'update'.");
+                    Console.WriteLine("Error: Valid ID is required for 'update'.");
                     return;
                 }
-                todoService.Update(updateId, args[2]);
+                string? title = null;
+                bool? isCompleted = null;
+                DateTime? dueDate = null;
+                for (int i = 2; i < args.Length; i++)
+                {
+                    switch (args[i])
+                    {
+                        case "--title":
+                            if (i + 1 < args.Length)
+                            {
+                                title = args[i + 1];
+                                i++;
+                            }
+                            break;
+
+
+                        case "--complete":
+                            if (i + 1 < args.Length && bool.TryParse(args[i + 1], out bool completed))
+                            {
+                                isCompleted = completed;
+                                i++;
+                            }
+                            break;
+
+                        case "--due":
+                            if (i + 1 < args.Length && DateTime.TryParse(args[i + 1], out DateTime parsedDate))
+                            {
+                                dueDate = parsedDate;
+                                i++;
+                            }
+                            break;
+                    }
+                }
+                todoService.Update(updateId, title, isCompleted, dueDate);
                 break;
 
             case "delete":
@@ -84,15 +119,36 @@ class Program
                     Console.WriteLine("Error: Valid ID is required for 'delete'.");
                     return;
                 }
-                todoService.Delete(deleteId);
+                Console.WriteLine("Are you sure you want to delete item {deletedId}? (y/n)");
+                var repsone = Console.ReadLine();
+                if (repsone?.ToLower() != "y")
+                {
+                    Console.WriteLine("Delete Cancelled.");
+                    return;
+                }
+                var success = todoService.Delete(deleteId);
+                if (success)
+                {
+                    Console.WriteLine($"Item with ID {deleteId} has been deleted.");
+                }
                 break;
 
             case "list":
                 var items = todoService.GetAll();
+                if (!items.Any())
+                {
+                    Console.WriteLine("No To-Do items found.");
+                    return;
+                }
+                Console.WriteLine("Your To-Do list items:");
                 foreach (var item in items)
                 {
-                    Console.WriteLine($"{item.Id}: {item.Title} [{(item.IsCompleted ? "✓" : " ")}]");
+                    Console.ForegroundColor = item.IsCompleted ? ConsoleColor.Green : ConsoleColor.Gray;
+                    Console.WriteLine($"{item.Id}: {item.Title} [{(item.IsCompleted ? "✔" : "⏳")}]");
+                    Console.ResetColor();
                 }
+
+                Console.WriteLine($"\nTotal items: {items.Count()}");
                 break;
 
             default:
