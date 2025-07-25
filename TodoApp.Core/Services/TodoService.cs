@@ -56,6 +56,11 @@ public class TodoService
         return true;
     }
 
+    public IEnumerable<TodoItem> GetByStatus(TaskStatus status)
+    {
+        return GetAll().Where(t => t.Status == status);
+    }
+
     public IEnumerable<TodoItem> GetAll()
     {
         return _repo.GetAll();

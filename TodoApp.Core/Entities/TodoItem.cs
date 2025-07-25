@@ -10,6 +10,7 @@ public class TodoItem
     public bool IsCompleted { get; set; }
     public DateTime? CompletedAt { get; set; }
     public PriorityLevel? Priority { get; set; }
+    public TaskStatus? Status { get; set; } = TaskStatus.Pending;
 
     public override string ToString()
     {

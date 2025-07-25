@@ -8,6 +8,7 @@ using System.ComponentModel.Design;
 using System.Buffers;
 using System.Linq;
 using TodoApp.Core.Services;
+using System.Runtime.CompilerServices;
 
 class Program
 {
@@ -42,6 +43,8 @@ class Program
             Console.WriteLine("  update <id> <title>       Update an existing item");
             Console.WriteLine("  delete <id>               Delete an item by ID");
             Console.WriteLine("  list                      List all to-do items");
+            Console.WriteLine("  complete <id>             Mark item as completed");
+            Console.WriteLine("  incomplete <id>           Mark item as pending");
             Console.WriteLine("  filter <status>           Filter items by status (completed/pending)");
             Console.WriteLine("  help                      Show this help menu\n");
 
@@ -49,13 +52,32 @@ class Program
             Console.WriteLine("  dotnet run add \"Buy groceries\"");
             Console.WriteLine("  dotnet run update 3 \"Buy milk instead\"");
             Console.WriteLine("  dotnet run delete 2");
-
+            Console.WriteLine("  dotnet run complete 1");
+            Console.WriteLine("  dotnet run incomplete 4");
+            Console.WriteLine("  dotnet run filter completed");
         }
 
         if (args.Length == 0)
         {
             ShowHelp();
             return;
+        }
+
+        static void DisplayTodos(IEnumerable<TodoItem> todos)
+        {
+            foreach (var todo in todos)
+            {
+                Console.ForegroundColor = todo.Status switch
+                {
+                    TaskStatus.Pending => ConsoleColor.Yellow,
+                    TaskStatus.InProgress => ConsoleColor.Cyan,
+                    TaskStatus.Completed => ConsoleColor.Green,
+                    _ => ConsoleColor.White
+                };
+
+                Console.WriteLine($"{todo.Id} {todo.Title} - {todo.Status}");
+            }
+            Console.ResetColor();
         }
 
         string command = args[0].ToLower();
@@ -150,6 +172,45 @@ class Program
 
                 Console.WriteLine($"\nTotal items: {items.Count()}");
                 break;
+
+            case "complete":
+                if (args.Length < 2 || !int.TryParse(args[1], out var completeId))
+                {
+                    Console.WriteLine("❌ Invalid command. Usage: complete <id>\nExample: complete 3");
+                    break;
+                }
+                todoService.Update(completeId, null, true, null);
+                Console.WriteLine($"✅ Task {completeId} marked as completed.");
+                break;
+
+            case "pending":
+                if (args.Length < 2 || !int.TryParse(args[1], out var pendingId))
+                {
+                    Console.WriteLine("❌ Invalid command. Usage: pending <id>\nExample: pending 3");
+                    break;
+                }
+                todoService.Update(pendingId, null, false, null);
+                Console.WriteLine($"✅ Task {pendingId} marked as pending.");
+                break;
+
+            case "filter":
+                if (args.Length < 2)
+                {
+                    Console.WriteLine("Usage: filter <status> \nStatus must be 'pending', 'inprogress', or 'completed'");
+                    break;
+                }
+                var argStatus = args[1].ToLower();
+
+                if (!Enum.TryParse<TaskStatus>(argStatus, true, out var status))
+                {
+                    Console.WriteLine("Invalid Status. Use 'pending', 'inprogress', or 'complete'.");
+                    break;
+                }
+
+                var filteredTasks = todoService.GetByStatus(status);
+                DisplayTodos(filteredTasks);
+                break;
+
 
             default:
                 Console.WriteLine($"Unknown command: {command}");
