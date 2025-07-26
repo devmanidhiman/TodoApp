@@ -68,7 +68,7 @@ public class TodoService
     public TodoItem? GetById(int id)
     {
         var todos = _repo.GetAll();
-        _logger.LogInformation("Fetched task with ID {Id}", id); 
+        _logger.LogInformation("Fetched task with ID {Id}", id);
         return todos.FirstOrDefault(t => t.Id == id);
     }
 
