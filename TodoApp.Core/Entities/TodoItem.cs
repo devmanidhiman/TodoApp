@@ -7,18 +7,24 @@ public class TodoItem
     public string? Description { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? DueDate { get; set; }
-    public bool IsCompleted { get; set; }
     public DateTime? CompletedAt { get; set; }
     public PriorityLevel? Priority { get; set; }
     public TaskStatus? Status { get; set; } = TaskStatus.Pending;
 
     public override string ToString()
     {
-        string status = IsCompleted ? "[✓]" : "[ ]";
+        string statusSymbol = Status switch
+        {
+            TaskStatus.Completed => "[✓]",
+            TaskStatus.InProgress => "[~]",
+            TaskStatus.Pending => "[ ]",
+            _ => "[?]"
+        };
+
         string? priority = Priority.HasValue ? Priority.ToString() : "None";
         string due = DueDate.HasValue ? $" — Due: {DueDate.Value.ToShortDateString()}" : "";
 
-        return $"{status} {Id}. {Title} ({priority} Priority){due}";
+        return $"{statusSymbol} {Id}. {Title} ({priority} Priority){due}";
     }
 
 }

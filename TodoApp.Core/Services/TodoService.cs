@@ -29,18 +29,22 @@ public class TodoService
         _logger.LogInformation("Added item: {Title}", title);
     }
 
-    public void Update(int id, string? title, bool? isCompleted, DateTime? dueDate)
+    public bool Update(int id, string? title, TaskStatus? taskStatus, DateTime? dueDate)
     {
         if (title is not null && string.IsNullOrWhiteSpace(title))
         {
             _logger.LogWarning("Attempted to Update with empty title.");
             Console.WriteLine("Error: Title cannot be empty.");
-            return;
+            return false;
         }
 
-        _repo.Update(id, title, isCompleted, dueDate);
-        _logger.LogInformation("Updated item {Id} with values: Title='{Title}', Completed={Completed}, DueDate={DueDate}",
-            id, title, isCompleted, dueDate);
+        bool updated = _repo.Update(id, title, taskStatus, dueDate);
+        if (updated)
+        {
+            _logger.LogInformation("Updated item {Id} with values: Title='{Title}', Completed={Completed}, DueDate={DueDate}",
+            id, title, taskStatus, dueDate);
+        }
+        return updated;
 
     }
 
@@ -59,6 +63,13 @@ public class TodoService
     public IEnumerable<TodoItem> GetByStatus(TaskStatus status)
     {
         return GetAll().Where(t => t.Status == status);
+    }
+
+    public TodoItem? GetById(int id)
+    {
+        var todos = _repo.GetAll();
+        _logger.LogInformation("Fetched task with ID {Id}", id); 
+        return todos.FirstOrDefault(t => t.Id == id);
     }
 
     public IEnumerable<TodoItem> GetAll()

@@ -84,7 +84,7 @@ public class FileTodoRepository : ITodoRepository
         Save();
         _logger.LogInformation("Add(): Successfully added todo item - ID: {Id}, Title: '{Title}'", todo.Id, todo.Title);
     }
-    public bool Update(int id, string? newTitle, bool? isCompleted, DateTime? dueDate)
+    public bool Update(int id, string? newTitle, TaskStatus? taskStatus, DateTime? dueDate)
     {
         var todos = LoadFromFile();
         var item = todos.FirstOrDefault(i => i.Id == id);
@@ -105,7 +105,7 @@ public class FileTodoRepository : ITodoRepository
 
         string oldTitle = item.Title;
         DateTime? oldDueDate = item.DueDate;
-        bool oldStatus = item.IsCompleted;
+        TaskStatus? oldStatus = item.Status;
 
         var updatedFields = new List<string>();
 
@@ -115,10 +115,10 @@ public class FileTodoRepository : ITodoRepository
             updatedFields.Add("Title");
         }
 
-        if (isCompleted.HasValue)
+        if (taskStatus.HasValue)
         {
-            item.IsCompleted = isCompleted.Value;
-            updatedFields.Add("IsCompleted");
+            item.Status = taskStatus.Value;
+            updatedFields.Add("Status");
         }
 
         if (dueDate.HasValue)
@@ -185,9 +185,10 @@ public class FileTodoRepository : ITodoRepository
     {
         var todos = LoadFromFile();
         var total = todos.Count();
-        var completed = todos.Count(t => t.IsCompleted);
-        var pending = todos.Count(t => !t.IsCompleted);
-        _logger.LogInformation("GetAll(): Retrieved {Total} items — {Completed} completed, {Pending} pending.", total, completed, pending);
+        var completed = todos.Count(t => t.Status == TaskStatus.Completed);
+        var pending = todos.Count(t => t.Status == TaskStatus.Pending);
+        var inprogress = todos.Count(t => t.Status == TaskStatus.InProgress);
+        _logger.LogInformation("GetAll(): Retrieved {Total} items — {Completed} completed, {Pending} pending, {Inprogress} inprogress", total, completed, pending, inprogress);
         return todos;
     }
     public List<TodoItem> GetTodoItems()
@@ -223,7 +224,7 @@ public class FileTodoRepository : ITodoRepository
     public IEnumerable<TodoItem> GetCompletedItems()
     {
         var allItems = LoadFromFile();
-        return [.. allItems.Where(item => item.IsCompleted)];
+        return [.. allItems.Where(item => item.Status == TaskStatus.Completed)];
     }
 
     public void CheckAll()
@@ -232,11 +233,11 @@ public class FileTodoRepository : ITodoRepository
         _logger.LogInformation("CheckAll(): Starting to mark all incomplete Todo items as complete.");
 
         int updatedCount = 0;
-        var incomplete = todos.Where(t => !t.IsCompleted).ToList();
-        _logger.LogInformation("CheckAll(): Found {Count} incomplete items to update.", incomplete.Count);
+        var incomplete = todos.Where(t => t.Status != TaskStatus.Completed).ToList();
+        _logger.LogInformation("CheckAll(): Found {Count} incomplete items to update. This include pending and Inprogress tasks.", incomplete.Count);
         foreach (var item in incomplete)
         {
-            item.IsCompleted = true;
+            item.Status = TaskStatus.Completed;
             updatedCount++;
             _logger.LogInformation("CheckAll(): Marked item as completed ID: {Id}, Title: '{Title}'", item.Id, item.Title);
 
