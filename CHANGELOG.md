@@ -43,6 +43,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - No breaking changes introduced
 
 
+## [1.3.0] - 2025-07-27
+
+### ✨ Features
+- **logging**: integrate Serilog with console and file sinks
+
+### 📁 Configuration
+- Added Serilog configuration to `appsettings.json`
+- Enabled rolling file logging to `Logs/log-<date>.txt`
+- Console output now includes timestamped, leveled logs
+
+### ✅ Validation
+- Confirmed log output in console and file
+- Verified structured logging with `Log.Information(...)`
 
 
 ---
@@ -53,3 +66,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Front-end integration using TypeScript
 - API endpoint for task status filtering
 - Unit tests for CLI command handlers
+
+
+[1.3.0]: https://github.com/devmanidhiman/TodoApp/compare/v1.2.1...v1.3.0
