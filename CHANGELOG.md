@@ -33,8 +33,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
-📦 Changelog: v1.2.1 — Fix Continuous Display IDs in CLI
-Release Date: 2025-07-27
+ ## v1.2.1 — 2025-07-27
+ Fix Continuous Display IDs in CLI
 🛠️ Fixed
 - Resolved issue where display IDs in CLI output were not incrementing correctly across multiple tasks
 - Ensured consistent and predictable task indexing for improved UX during task listing
