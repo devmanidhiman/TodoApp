@@ -8,7 +8,7 @@ using System.ComponentModel.Design;
 using System.Buffers;
 using System.Linq;
 using TodoApp.Core.Services;
-using System.Runtime.CompilerServices;
+using Serilog;
 
 class Program
 {
@@ -16,15 +16,19 @@ class Program
     {
         // Create a HostBuilder to set up dependency injection and logging
         var host = Host.CreateDefaultBuilder(args)
-        .ConfigureServices((context, services) =>
-        { services.AddSingleton<ITodoRepository, FileTodoRepository>(); })
-        .ConfigureLogging(logging =>
-        {
-            logging.ClearProviders();
-            logging.AddConsole();
-            logging.SetMinimumLevel(LogLevel.Information);
-        }).Build();
-        // Resolve the ITodoRepository from the service provider
+            .UseSerilog((context, services, configuration) => configuration
+                .ReadFrom.Configuration(context.Configuration)
+                .ReadFrom.Services(services)
+                .Enrich.FromLogContext()
+                .WriteTo.Console()
+                .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day)
+            )
+            .ConfigureServices((context, services) =>
+            {
+                services.AddSingleton<ITodoRepository, FileTodoRepository>();
+            })
+            .Build();
+        Log.Information("🚀 Serilog is now wired up and logging!");
         var repo = host.Services.GetRequiredService<ITodoRepository>();
         var logger = host.Services.GetRequiredService<ILogger<TodoService>>();
 
