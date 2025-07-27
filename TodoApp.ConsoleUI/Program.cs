@@ -44,8 +44,8 @@ class Program
             Console.WriteLine("  delete <id>               Delete an item by ID");
             Console.WriteLine("  list                      List all to-do items");
             Console.WriteLine("  complete <id>             Mark item as completed");
-            Console.WriteLine("  pending <id>           Mark item as pending");
-            Console.WriteLine("  filter <status>           Filter items by status (completed/pending)");
+            Console.WriteLine("  pending <id>              Mark item as pending");
+            Console.WriteLine("  filter <status>           Filter items by status (completed/pending)/inprogress");
             Console.WriteLine("  help                      Show this help menu\n");
 
             Console.WriteLine("Examples:");
