@@ -66,6 +66,7 @@ class Program
 
         static void DisplayTodos(IEnumerable<TodoItem> todos)
         {
+            int displayIndex = 1;
             foreach (var todo in todos)
             {
                 Console.ForegroundColor = todo.Status switch
@@ -76,7 +77,7 @@ class Program
                     _ => ConsoleColor.White
                 };
 
-                Console.WriteLine($"{todo.Id} {todo.Title} - {todo.Status}");
+                Console.WriteLine($"{displayIndex++} {todo.Title} - {todo.Status} TaskID - {todo.Id}");
             }
             Console.ResetColor();
         }
@@ -178,12 +179,7 @@ class Program
                     return;
                 }
                 Console.WriteLine("Your To-Do list items:");
-                foreach (var item in items)
-                {
-                    Console.ForegroundColor = item.Status == TaskStatus.Completed ? ConsoleColor.Green : ConsoleColor.Gray;
-                    Console.WriteLine($"{item.Id}: {item.Title} [{(item.Status == TaskStatus.Completed ? "✔" : "⏳")}]");
-                    Console.ResetColor();
-                }
+                DisplayTodos(items);
 
                 Console.WriteLine($"\nTotal items: {items.Count()}");
                 break;
@@ -264,34 +260,6 @@ class Program
                 ShowHelp();
                 break;
         }
-
-        // var validTodo = new TodoItem
-        // {
-        //     Title = "Finish logging refactor",
-        //     DueDate = DateTime.Today.AddDays(2),
-        //     IsCompleted = false
-        // };
-
-        // Console.WriteLine($"Assigned ID: {validTodo.Id}");
-
-        // var invalidTitleTodo = new TodoItem
-        // {
-        //     Title = "   ", // Invalid title
-        //     DueDate = DateTime.Today.AddDays(2),
-        //     IsCompleted = false
-        // };
-
-        // var pastDueTodo = new TodoItem
-        // {
-        //     Title = "Submit PR",
-        //     DueDate = DateTime.Today.AddDays(-1), // Invalid due date
-        //     IsCompleted = false
-        // };
-
-
-        // repo.Add(validTodo);         // Should succeed and assign ID
-        // repo.Add(invalidTitleTodo); // Should fail validation
-        // repo.Add(pastDueTodo);      // Should fail validation
 
     }
 }
