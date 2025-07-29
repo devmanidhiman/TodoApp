@@ -1,12 +1,45 @@
-# [](https://github.com/devmanidhiman/TodoApp/compare/v1.2.0...v) (2025-07-27)
-
-
-
 # Changelog
 
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+---
+
+## [v1.3.1] - 2025-07-29
+
+### 🔧 Improvements
+- Wrapped repository calls in try-catch blocks
+- Logged exceptions with stack traces using Serilog
+- Improved resilience and observability of `TodoService`
+
+---
+
+## [v1.3.0] - 2025-07-27
+
+### ✨ Features
+- **logging**: integrate Serilog with console and file sinks
+
+### 📁 Configuration
+- Added Serilog configuration to `appsettings.json`
+- Enabled rolling file logging to `Logs/log-<date>.txt`
+- Console output now includes timestamped, leveled logs
+
+### ✅ Validation
+- Confirmed log output in console and file
+- Verified structured logging with `Log.Information(...)`
+
+---
+
+## [v1.2.1] - 2025-07-27
+
+### 🐞 Fixed
+- Resolved issue where display IDs in CLI output were not incrementing correctly across multiple tasks
+- Ensured consistent and predictable task indexing for improved UX during task listing
+
+### 🔍 Notes
+- This fix improves clarity when viewing tasks via CLI, especially after multiple additions or deletions
+- No breaking changes introduced
 
 ---
 
@@ -33,33 +66,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
- ## v1.2.1 — 2025-07-27
- Fix Continuous Display IDs in CLI
-🛠️ Fixed
-- Resolved issue where display IDs in CLI output were not incrementing correctly across multiple tasks
-- Ensured consistent and predictable task indexing for improved UX during task listing
-🔍 Notes
-- This fix improves clarity when viewing tasks via CLI, especially after multiple additions or deletions
-- No breaking changes introduced
-
-
-## [1.3.0] - 2025-07-27
-
-### ✨ Features
-- **logging**: integrate Serilog with console and file sinks
-
-### 📁 Configuration
-- Added Serilog configuration to `appsettings.json`
-- Enabled rolling file logging to `Logs/log-<date>.txt`
-- Console output now includes timestamped, leveled logs
-
-### ✅ Validation
-- Confirmed log output in console and file
-- Verified structured logging with `Log.Information(...)`
-
-
----
-
 ## [Unreleased]
 
 ### Planned
@@ -67,5 +73,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - API endpoint for task status filtering
 - Unit tests for CLI command handlers
 
+---
 
-[1.3.0]: https://github.com/devmanidhiman/TodoApp/compare/v1.2.1...v1.3.0
+[v1.3.1]: https://github.com/devmanidhiman/TodoApp/compare/v1.3.0...v1.3.1  
+[v1.3.0]: https://github.com/devmanidhiman/TodoApp/compare/v1.2.1...v1.3.0  
+[v1.2.1]: https://github.com/devmanidhiman/TodoApp/compare/v1.2.0...v1.2.1  
+[v1.2.0]: https://github.com/devmanidhiman/TodoApp/releases/tag/v1.2.0
